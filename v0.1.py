@@ -8,14 +8,13 @@ from lxml import etree
 import string
 import codecs
 import json
+
 try:
     import cPickle as pickle
 except ImportError:
     import pickle
 
-
 __author__ = 'ZhuZichen'
-
 
 __usr = None
 __pwd = None
@@ -167,11 +166,13 @@ def uis_cert():
     except urllib2.URLError, e:
         print e.reason
 
+
 def inputusrpwd():
     global __usr
     global __pwd
     __usr = raw_input('学号: ')
     __pwd = raw_input('密码: ')
+
 
 def eams_grade(semesterid='63'):
     # --------eams home--------
@@ -233,9 +234,22 @@ if __name__ == '__main__':
 
     try:
         f = codecs.open(filename='v0.1_config.json', mode='r', encoding='utf-8')
-        t = json.load(fp=f, encoding='utf-8')
-        __usr = t['usr']
-        __pwd = t['pwd']
+
+        try:
+            t = json.load(fp=f, encoding='utf-8')
+            if 'usr' in t and 'pwd' in t:
+                __usr = t['usr']
+                __pwd = t['pwd']
+            else:
+                f.close()
+                inputusrpwd()
+                with codecs.open(filename='v0.1_config.json', mode='w', encoding='utf-8') as f:
+                    json.dump(obj={'usr': __usr, 'pwd': __pwd}, fp=f)
+        except ValueError:
+            f.close()
+            inputusrpwd()
+            with codecs.open(filename='v0.1_config.json', mode='w', encoding='utf-8') as f:
+                json.dump(obj={'usr': __usr, 'pwd': __pwd}, fp=f)
     except IOError:
         inputusrpwd()
         with codecs.open(filename='v0.1_config.json', mode='w', encoding='utf-8') as f:
